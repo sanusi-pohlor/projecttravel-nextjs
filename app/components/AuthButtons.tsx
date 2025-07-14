@@ -1,8 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import provinces from '@/lib/provinces.json';
+import ProfileDropdown from './ProfileDropdown';
 
 const AuthButtons = () => {
   const [showModal, setShowModal] = useState(false);
@@ -12,10 +14,37 @@ const AuthButtons = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [province, setProvince] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const remembered = localStorage.getItem('isLoggedIn');
+    const sessionActive = sessionStorage.getItem('isLoggedIn');
+    if (remembered === 'true' || sessionActive === 'true') {
+      setSession(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleOpenModal = (login: boolean) => {
     setIsLogin(login);
     setShowModal(true);
+    setError(null);
   };
 
   const handleCloseModal = () => {
@@ -25,10 +54,23 @@ const AuthButtons = () => {
     setPassword('');
     setConfirmPassword('');
     setProvince('');
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!isLogin && (!name || !email || !password || !confirmPassword || !province)) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (isLogin && (!email || !password)) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
     const url = isLogin ? '/api/auth/login' : '/api/auth/signup';
     const payload = isLogin ? { email, password } : { name, email, password, confirmPassword, province };
     try {
@@ -47,31 +89,56 @@ const AuthButtons = () => {
       }
 
       console.log('Success:', data);
+      setSession(true);
+      if (rememberMe) {
+        localStorage.setItem('isLoggedIn', 'true');
+      } else {
+        sessionStorage.setItem('isLoggedIn', 'true');
+      }
       handleCloseModal();
       // Here you might want to redirect the user or update the UI
     } catch (error) {
       console.error('Error:', error);
-      // Handle error display to the user
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
   };
 
+  const handleLogout = () => {
+    setSession(false);
+    setShowDropdown(false);
+    localStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('isLoggedIn');
+  };
 
   return (
     <>
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={() => handleOpenModal(false)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-          สมัครสมาชิก
-        </button>
-        <button
-          onClick={() => handleOpenModal(true)}
-          className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-        >
-          เข้าสู่ระบบ
-        </button>
-      </div>
+      {session ? (
+        <div className="relative" ref={dropdownRef}>
+          <button className="flex items-center space-x-2" onClick={() => setShowDropdown(!showDropdown)} aria-label="Open user menu">
+            <Image src="/user.svg" alt="User Profile" width={32} height={32} />
+          </button>
+          {showDropdown && <ProfileDropdown onLogout={handleLogout} />}
+        </div>
+      ) : (
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleOpenModal(false)}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            สมัครสมาชิก
+          </button>
+          <button
+            onClick={() => handleOpenModal(true)}
+            className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          >
+            เข้าสู่ระบบ
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <div
@@ -79,8 +146,9 @@ const AuthButtons = () => {
           tabIndex={-1}
           aria-hidden="true"
           className="fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50"
+          onClick={handleCloseModal}
         >
-          <div className="relative p-4 w-full max-w-md max-h-full">
+          <div className="relative p-4 w-full max-w-md max-h-full" onClick={(e) => e.stopPropagation()}>
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -98,6 +166,11 @@ const AuthButtons = () => {
                 </button>
               </div>
               <div className="p-4 md:p-5">
+                {error && (
+                  <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                    {error}
+                  </div>
+                )}
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   {!isLogin && (
                     <>
@@ -132,6 +205,10 @@ const AuthButtons = () => {
                       </div>
                     </>
                   )}
+                  <div className="flex items-center">
+                    <input id="remember-me" type="checkbox" value="" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" />
+                    <label htmlFor="remember-me" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember me</label>
+                  </div>
                   <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     {isLogin ? 'Login to your account' : 'Create account'}
                   </button>
