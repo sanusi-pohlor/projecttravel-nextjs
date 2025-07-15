@@ -52,7 +52,7 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <AuthButtons />
+            <AuthButtons />
             </li>
           </ul>
         </div>

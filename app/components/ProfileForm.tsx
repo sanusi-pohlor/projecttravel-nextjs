@@ -15,7 +15,7 @@ const ProfileForm = () => {
     const fetchUserData = async () => {
       try {
         // TODO: Replace hardcoded userId with actual user ID from session/token
-        const userId = '1';
+        const userId = '1'; 
         const response = await fetch(`/api/auth/profile?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch user data');
