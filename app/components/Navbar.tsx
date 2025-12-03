@@ -37,12 +37,12 @@ const Navbar = () => {
             </li>
             <li>
               <Link href="#" className={`block py-2 px-3 rounded md:bg-transparent md:p-0 ${pathname === '/about' ? 'text-white bg-blue-700 md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'} dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}>
-                About
+                สถานที่ท่องเที่ยว
               </Link>
             </li>
             <li>
               <Link href="#" className={`block py-2 px-3 rounded md:bg-transparent md:p-0 ${pathname === '/services' ? 'text-white bg-blue-700 md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'} dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}>
-                Services
+                ร้านค้า
               </Link>
             </li>
             <li>

@@ -1,64 +1,101 @@
-
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
+import { Province } from '@/lib/types';
 
-const ChartDisplay = () => {
-  const pieOptions = {
-    labels: ['Group A', 'Group B', 'Group C', 'Group D'],
-    responsive: [{
-      breakpoint: 480,
-      options: {
-        chart: {
-          width: 200
-        },
-        legend: {
-          position: 'bottom'
+interface ChartDisplayProps {
+  selectedProvince: Province | null;
+}
+
+const ChartDisplay = ({ selectedProvince }: ChartDisplayProps) => {
+  // Mock data state
+  const [pieSeries, setPieSeries] = useState([44, 55, 13, 43]);
+  const [barSeries, setBarSeries] = useState([{ name: 'Visitors', data: [30, 40, 45, 50, 49, 60, 70, 91] }]);
+
+  // Update charts when province changes
+  useEffect(() => {
+    if (selectedProvince) {
+      // Generate random data based on province ID to simulate unique data
+      const seed = selectedProvince.id;
+      const randomSeries = [
+        (seed * 12) % 100,
+        (seed * 45) % 100,
+        (seed * 23) % 100,
+        (seed * 67) % 100
+      ];
+      setPieSeries(randomSeries);
+
+      const randomBarData = Array.from({ length: 8 }, (_, i) => (seed * (i + 1) * 7) % 100);
+      setBarSeries([{ name: 'Visitors', data: randomBarData }]);
+    } else {
+      // Default data
+      setPieSeries([44, 55, 13, 43]);
+      setBarSeries([{ name: 'Visitors', data: [30, 40, 45, 50, 49, 60, 70, 91] }]);
+    }
+  }, [selectedProvince]);
+
+  const pieOptions: ApexCharts.ApexOptions = {
+    labels: ['Hotels', 'Attractions', 'Restaurants', 'Transport'],
+    colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
+    legend: { position: 'bottom' },
+    dataLabels: { enabled: false },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '65%'
         }
       }
-    }]
+    }
   };
-  const pieSeries = [400, 300, 300, 200];
 
-  const barOptions = {
+  const barOptions: ApexCharts.ApexOptions = {
+    chart: {
+      toolbar: { show: false },
+      fontFamily: 'inherit'
+    },
+    colors: ['#3B82F6'],
     xaxis: {
-      categories: ['Page A', 'Page B', 'Page C', 'Page D', 'Page E', 'Page F', 'Page G'],
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+      axisBorder: { show: false },
+      axisTicks: { show: false }
     },
-    responsive: [{
-      breakpoint: 480,
-      options: {
-        chart: {
-          width: 200
-        },
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }]
+    grid: {
+      borderColor: '#f3f4f6',
+      strokeDashArray: 4,
+    },
+    dataLabels: { enabled: false },
+    plotOptions: {
+      bar: { borderRadius: 4 }
+    }
   };
-  const barSeries = [
-    {
-      name: 'PV',
-      data: [2400, 1398, 9800, 3908, 4800, 3800, 4300],
-    },
-    {
-      name: 'UV',
-      data: [4000, 3000, 2000, 2780, 1890, 2390, 3490],
-    },
-  ];
 
   return (
-    <div className="h-full flex flex-col">
-      <h2 className="text-xl font-bold">Chart Data</h2>
-      <div className="flex-grow flex flex-col space-y-4">
-        <div className="flex-grow bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Chart 1: Pie Chart</h3>
-          <Chart options={pieOptions} series={pieSeries} type="pie" height="100%" />
+    <div className="h-full flex flex-col space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-800">
+          {selectedProvince ? `Statistics: ${selectedProvince.name_th}` : 'National Statistics'}
+        </h2>
+        <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-green-100 text-green-800">
+          Live Data
+        </span>
+      </div>
+
+      <div className="flex-grow flex flex-col space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+        {/* Pie Chart Card */}
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-600 mb-4">Revenue Distribution</h3>
+          <div className="h-64">
+            <Chart options={pieOptions} series={pieSeries} type="donut" height="100%" />
+          </div>
         </div>
-        <div className="flex-grow bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Chart 2: Bar Chart</h3>
-          <Chart options={barOptions} series={barSeries} type="bar" height="100%" />
+
+        {/* Bar Chart Card */}
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-600 mb-4">Monthly Visitors (k)</h3>
+          <div className="h-64">
+            <Chart options={barOptions} series={barSeries} type="bar" height="100%" />
+          </div>
         </div>
       </div>
     </div>
