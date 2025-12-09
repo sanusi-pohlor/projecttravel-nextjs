@@ -9,6 +9,7 @@ import ProfileDropdown from './ProfileDropdown';
 const AuthButtons = () => {
   const [showModal, setShowModal] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,6 +47,7 @@ const AuthButtons = () => {
     setIsLogin(login);
     setShowModal(true);
     setError(null);
+    setIsForgotPassword(false);
   };
 
   const handleCloseModal = () => {
@@ -57,12 +59,22 @@ const AuthButtons = () => {
     setProvince('');
     setError(null);
     setIsLoading(false);
+    setIsForgotPassword(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    if (isForgotPassword) {
+      // Handle forgot password logic
+      console.log('Forgot password for:', email);
+      // Here you would typically call an API endpoint to send a password reset email
+      setIsLoading(false);
+      handleCloseModal();
+      return;
+    }
 
     if (!isLogin && (!name || !email || !password || !confirmPassword || !province)) {
       setError('Please fill in all required fields.');
@@ -120,6 +132,11 @@ const AuthButtons = () => {
     sessionStorage.removeItem('isLoggedIn');
   };
 
+  const getModalTitle = () => {
+    if (isForgotPassword) return 'ลืมรหัสผ่าน';
+    return isLogin ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่';
+  };
+
   return (
     <>
       {session ? (
@@ -165,7 +182,7 @@ const AuthButtons = () => {
               {/* Header */}
               <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {isLogin ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่'}
+                  {getModalTitle()}
                 </h3>
                 <button
                   type="button"
@@ -192,76 +209,116 @@ const AuthButtons = () => {
                 )}
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
-                  {!isLogin && (
-                    <div>
-                      <label htmlFor="name" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">ชื่อของคุณ</label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
-                          </svg>
-                        </div>
-                        <input type="text" name="name" id="name" value={name} onChange={(e) => setName(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" placeholder="สมชาย ใจดี" required />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label htmlFor="email" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">อีเมล</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
-                          <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z" />
-                          <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z" />
-                        </svg>
-                      </div>
-                      <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" placeholder="name@company.com" required />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="password" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">รหัสผ่าน</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-                          <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z" />
-                        </svg>
-                      </div>
-                      <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required />
-                    </div>
-                  </div>
-
-                  {!isLogin && (
+                  {isForgotPassword ? (
                     <>
                       <div>
-                        <label htmlFor="confirmPassword" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">ยืนยันรหัสผ่าน</label>
+                        <label htmlFor="email" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">อีเมลของคุณ</label>
                         <div className="relative">
                           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-                              <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z" />
+                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+                              <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z" />
+                              <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z" />
                             </svg>
                           </div>
-                          <input type="password" name="confirmPassword" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required />
+                          <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" placeholder="name@company.com" required />
                         </div>
                       </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        เราจะส่งลิงก์เพื่อรีเซ็ตรหัสผ่านไปยังอีเมลของคุณ
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      {!isLogin && (
+                        <div>
+                          <label htmlFor="name" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">ชื่อของคุณ</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
+                              </svg>
+                            </div>
+                            <input type="text" name="name" id="name" value={name} onChange={(e) => setName(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" placeholder="สมชาย ใจดี" required />
+                          </div>
+                        </div>
+                      )}
+
                       <div>
-                        <label htmlFor="province" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">จังหวัด</label>
-                        <select id="province" value={province} onChange={(e) => setProvince(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required>
-                          <option value="">-- กรุณาเลือกจังหวัด --</option>
-                          {provinces.map((p) => (
-                            <option key={p.id} value={p.name_th}>{p.name_th}</option>
-                          ))}
-                        </select>
+                        <label htmlFor="email" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">อีเมล</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+                              <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z" />
+                              <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z" />
+                            </svg>
+                          </div>
+                          <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" placeholder="name@company.com" required />
+                        </div>
+                      </div>
+
+                      {!isLogin && (
+                        <>
+                          <div>
+                            <label htmlFor="password" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">รหัสผ่าน</label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                  <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z" />
+                                </svg>
+                              </div>
+                              <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="confirmPassword" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">ยืนยันรหัสผ่าน</label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                  <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z" />
+                                </svg>
+                              </div>
+                              <input type="password" name="confirmPassword" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="province" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">จังหวัด</label>
+                            <select id="province" value={province} onChange={(e) => setProvince(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required>
+                              <option value="">-- กรุณาเลือกจังหวัด --</option>
+                              {provinces.map((p) => (
+                                <option key={p.id} value={p.name_th}>{p.name_th}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </>
+                      )}
+
+                      {isLogin && (
+                        <div>
+                          <label htmlFor="password" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">รหัสผ่าน</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z" />
+                              </svg>
+                            </div>
+                            <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors" required />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input id="remember-me" type="checkbox" value="" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" />
+                          <label htmlFor="remember-me" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">จดจำฉัน</label>
+                        </div>
+                        {isLogin && (
+                          <a href="#" className="text-sm text-blue-700 hover:underline dark:text-blue-500" onClick={() => setIsForgotPassword(true)}>
+                            ลืมรหัสผ่าน?
+                          </a>
+                        )}
                       </div>
                     </>
                   )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input id="remember-me" type="checkbox" value="" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" />
-                      <label htmlFor="remember-me" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">จดจำฉัน</label>
-                    </div>
-                  </div>
 
                   <button
                     type="submit"
@@ -277,13 +334,22 @@ const AuthButtons = () => {
                         กำลังดำเนินการ...
                       </>
                     ) : (
-                      isLogin ? 'เข้าสู่ระบบ' : 'สร้างบัญชี'
+                      isForgotPassword ? 'ส่งลิงก์รีเซ็ต' : (isLogin ? 'เข้าสู่ระบบ' : 'สร้างบัญชี')
                     )}
                   </button>
                   <div className="text-sm font-medium text-gray-500 dark:text-gray-400 text-center">
-                    {isLogin ? 'ยังไม่มีบัญชี?' : 'มีบัญชีอยู่แล้ว?'} <a href="#" className="text-blue-700 hover:underline dark:text-blue-500 font-bold" onClick={() => setIsLogin(!isLogin)}>
-                      {isLogin ? 'สร้างบัญชีใหม่' : 'เข้าสู่ระบบ'}
-                    </a>
+                    {isForgotPassword ? (
+                      <a href="#" className="text-blue-700 hover:underline dark:text-blue-500 font-bold" onClick={() => setIsForgotPassword(false)}>
+                        กลับไปหน้าเข้าสู่ระบบ
+                      </a>
+                    ) : (
+                      <>
+                        {isLogin ? 'ยังไม่มีบัญชี?' : 'มีบัญชีอยู่แล้ว?'}{' '}
+                        <a href="#" className="text-blue-700 hover:underline dark:text-blue-500 font-bold" onClick={() => setIsLogin(!isLogin)}>
+                          {isLogin ? 'สร้างบัญชีใหม่' : 'เข้าสู่ระบบ'}
+                        </a>
+                      </>
+                    )}
                   </div>
                 </form>
               </div>
