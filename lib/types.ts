@@ -4,3 +4,18 @@ export interface Province {
     name_en: string;
     zip_code?: string;
 }
+
+export interface Region {
+    id: string;
+    name: string;
+}
+
+export interface Attraction {
+    id: number;
+    name: string;
+    region: string;
+    province: string;
+    description: string;
+    imageUrl: string;
+    mapUrl: string;
+}
