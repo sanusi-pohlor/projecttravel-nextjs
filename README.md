@@ -1,38 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Travel - สถานที่ท่องเที่ยวไทย 🇹🇭
 
-## Getting Started
+เว็บไซต์รวบรวมและแสดงแหล่งท่องเที่ยว Local ในประเทศไทย ที่ออกแบบมาเพื่อให้ผู้ใช้งานค้นพบสถานที่สวยงามและน่าสนใจในแต่ละภูมิภาค
 
-First, run the development server:
+## 🌟 ฟีเจอร์หลัก (Features)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **หน้าแรก (Home Page):** แสดงรายการสถานที่ท่องเที่ยวยอดนิยมทั่วประเทศไทยในรูปแบบการ์ดที่สวยงาม
+- **หมวดหมู่ตามภูมิภาค:** มีแถบเมนู (Navbar) สำหรับคัดกรองและเลือกดูสถานที่ท่องเที่ยวแยกตามภูมิภาค (ภาคเหนือ, ภาคกลาง, ภาคอีสาน, ภาคใต้) ได้อย่างสะดวก
+- **หน้ารายละเอียดและแผนที่:** เมื่อคลิกที่สถานที่ท่องเที่ยว จะแสดงข้อมูลรายละเอียดแบบเต็ม พร้อมกับ **แผนที่ตั้ง (Google Maps Embed)** เพื่อดูพิกัดสถานที่จริง
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework:** [Next.js](https://nextjs.org/) (App Router)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Database:** PostgreSQL
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **AI Assistant:** พัฒนาและช่วยเหลือโดย AI Gemini-cli
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 การติดตั้งและรันโปรเจกต์ (Getting Started)
 
-## Learn More
+1. **ติดตั้ง Dependencies:**
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **ตั้งค่า Database:**
+   ตรวจสอบให้แน่ใจว่าได้ตั้งค่าการเชื่อมต่อ PostgreSQL ในไฟล์ `.env` เช่น:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/projecttravelnextjs"
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **สร้าง Database Schema:**
+   ```bash
+   npx prisma db push
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **เพิ่มข้อมูลจำลอง (Seed Data):**
+   ```bash
+   npx prisma db seed
+   ```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-- โปรเจคนี้ใช้ AI Gemini-cli เป็นตัวช่วย
+5. **รันโปรเจกต์ (Development Server):**
+   ```bash
+   npm run dev
+   ```
+   จากนั้นเปิดเว็บบราว์เซอร์ไปที่ [http://localhost:3000](http://localhost:3000)
